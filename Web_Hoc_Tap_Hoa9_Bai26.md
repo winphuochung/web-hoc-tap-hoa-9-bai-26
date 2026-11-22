@@ -1338,9 +1338,16 @@ function doSubmit(){
     ? "🎉 Xuất sắc! Em đạt " + score + "/10 điểm. Em đã nắm chắc kiến thức về ethylic alcohol rồi!"
     : "Em đạt " + score + "/10 điểm. Hãy xem lại phần giải thích ở các câu chưa đúng rồi làm lại nhé!";
   banner.scrollIntoView({ behavior: "smooth", block: "center" });
-  /* TRẠNG THÁI CHỜ WEB APP: khóa hoa9-bai26 chưa có Apps Script Web App URL (Google đang chặn tạo dự án mới).
-     Điểm trắc nghiệm hiện chỉ lưu localStorage (điểm cao nhất). Parent sẽ patch fetch() sau khi deploy xong.
-     TUYỆT ĐỐI KHÔNG bịa URL Web App. */
+  if (!scoreSent) {
+    scoreSent = true;
+    try {
+      var secs = Math.max(0, Math.round((Date.now() - (quizStartTime || Date.now())) / 1000));
+      var dur = Math.floor(secs / 60) + " phút " + (secs % 60) + " giây";
+      var detail = QUESTIONS.map(function(item, qi){ return (qi + 1) + ": " + (answers[qi] < 0 ? "-" : LETTERS[answers[qi]]) + "/" + LETTERS[item.ans]; }).join(", ");
+      fetch("https://script.google.com/macros/s/AKfycbxMmHS_5ODlvKYtuAts6NfyvZpwsB7Vv445wNoVKyhHbD15dkr_byxalrQAlJ5JSJX1/exec", {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify({name: currentStudent.name, className: currentStudent.cls, score: score, correct: score, detail: detail, duration: dur})}).catch(function(){});
+    } catch (e) {}
+  }
+  
   scoreSent = true;
 }
 var quizModal = document.getElementById("quizModal");
